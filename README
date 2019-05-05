@@ -1,0 +1,2 @@
+Nécessite la biliothèque ncurses.
+Compilation : cc -o sudoku sudoku.c -lncurses
