@@ -22,17 +22,21 @@
 #define COL_BASE 1
 #define COL_ERREUR 2
 
+#define CASE_VIDE '.'
+
 static int couleurs[2][3] = {{NORMAL, BASE, ERREUR}, {NORMAL_, BASE_, ERREUR_}};
 
 // Quelques grilles de tests.
-#define tst1  "7186.5....3..42.....4.8.56..4729.65...........62.1784..73.5.4.....47..2....1.3975"
-#define tst2  "..7..8.3..2...974.8..2.....48......3..2...6..3......57.....7..2.618...9..9.3..5.."
-#define tst3  ".9...657171.9.5.....6.....36.41.7.......8.......5.37.41.....6.....8.1.495496...1."
-#define tst4  "4...81..2.6.........3..2.84.....3..83...7...69..6.....78.2..9.........2.6..43...7"
-#define tstE  "1.96.4.2.53.2.......8...1.5.....6.5.....4.....6.3.....2.1...7.......5.13.8.7.95.2"
-#define tstX  "....7..8......9..5.9...3....37.91...4..7...93.....5....1..6......9214.3.....37.41"
-static char *tsts[] = {tst1, tst2, tst3, tst4, tstE, tstX};
-static int tst = 0;
+#define tst1   "7186.5....3..42.....4.8.56..4729.65...........62.1784..73.5.4.....47..2....1.3975"
+#define tst2   "..7..8.3..2...974.8..2.....48......3..2...6..3......57.....7..2.618...9..9.3..5.."
+#define tst3   ".9...657171.9.5.....6.....36.41.7.......8.......5.37.41.....6.....8.1.495496...1."
+#define tst4   "4...81..2.6.........3..2.84.....3..83...7...69..6.....78.2..9.........2.6..43...7"
+#define tstE   "1.96.4.2.53.2.......8...1.5.....6.5.....4.....6.3.....2.1...7.......5.13.8.7.95.2"
+#define tstCG1 "..6....5...37.....7...35..8....7..12...942...62..8....9..12...3.....36...5....7.."
+#define tstCG2 "8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4.."
+#define tstX   "....7..8......9..5.9...3....37.91...4..7...93.....5....1..6......9214.3.....37.41"
+static char *tsts[] = {tstCG1, tstCG2, tst1, tst2, tst3, tst4, tstE, tstX};
+static int tst = 1;
 
 static char table[81];
 static char resolv[81];
@@ -80,7 +84,7 @@ void traces()
         {
             mvprintw(l, c*2, "%c", table[l*9+c]);
             mvprintw(l+10, c*2, "%c", resolv[l*9+c]);
-            mvprintw(l+20, c*2, "%c", tberreurs[l*9+c] ? '#' : '.');
+            mvprintw(l+20, c*2, "%c", tberreurs[l*9+c] ? '#' : CASE_VIDE);
         }
 }
 
@@ -97,16 +101,16 @@ int verifier()
     {
         for (int c=0; c<9; c++)
         {
-            if (tberreurs[l*9+c] || resolv[l*9+c] == '.')
+            if (tberreurs[l*9+c] || resolv[l*9+c] == CASE_VIDE)
                 continue;
             for (int i=0; i<9; i++)
             {
-                if (i != l && (v=resolv[i*9+c]) != '.' && v == resolv[l*9+c])
+                if (i != l && (v=resolv[i*9+c]) != CASE_VIDE && v == resolv[l*9+c])
                     tberreurs[l*9+c] = tberreurs[i*9+c] = 1;
-                if (i != c && (v=resolv[l*9+i]) != '.' && v == resolv[l*9+c])
+                if (i != c && (v=resolv[l*9+i]) != CASE_VIDE && v == resolv[l*9+c])
                     tberreurs[l*9+c] = tberreurs[l*9+i] = 1;
                 if (((l/3)*3+i/3)*9+(c/3)*3+i%3 != l*9+c &&
-                    (v=resolv[((l/3)*3+i/3)*9+(c/3)*3+i%3]) != '.' && v == resolv[l*9+c])
+                    (v=resolv[((l/3)*3+i/3)*9+(c/3)*3+i%3]) != CASE_VIDE && v == resolv[l*9+c])
                     tberreurs[l*9+c] = tberreurs[((l/3)*3+i/3)*9+(c/3)*3+i%3] = 1;
             }
         }
@@ -114,9 +118,9 @@ int verifier()
             continue;
         for (int i=l+1; i<9; i++)
         {
-            if ((v=resolv[i*10]) != '.' && v == resolv[l*10])
+            if ((v=resolv[i*10]) != CASE_VIDE && v == resolv[l*10])
                 tberreurs[l*10] = tberreurs[i*10] = 1;
-            if ((v=resolv[(8-i)*9+i]) != '.' && v == resolv[(8-l)*9+l])
+            if ((v=resolv[(8-i)*9+i]) != CASE_VIDE && v == resolv[(8-l)*9+l])
                 tberreurs[(8-l)*9+l] = tberreurs[(8-i)*9+i] = 1;
         }
     }
@@ -132,7 +136,7 @@ int complet()
 {
     for (int i=0; i<81; i++)
     {
-        if (resolv[i] == '.')
+        if (resolv[i] == CASE_VIDE)
             return 0;
     }
     return verifier() == 0;
@@ -185,7 +189,7 @@ void affiche()
             if (affpossible)
             {
                 int nb = nbpossibles(j, i);
-                if (resolv[j*9+i] == '.')
+                if (resolv[j*9+i] == CASE_VIDE)
                 {
                     if (nb == 1)
                         attrset(COLOR_PAIR(VERT));
@@ -200,13 +204,13 @@ void affiche()
                 v2 = resolv[j*9+i];
                 if (tberreurs[j*9+i])
                     attrset(COLOR_PAIR(couleurs[0][COL_ERREUR]));
-                else if (v1 != '.')
+                else if (v1 != CASE_VIDE)
                     attrset(COLOR_PAIR(couleurs[0][COL_BASE]));
                 else
                     attrset(COLOR_PAIR(couleurs[0][COL_NORMAL]));
-                if (resolv[ycur*9+xcur] != '.' && resolv[j*9+i] == resolv[ycur*9+xcur])
+                if (resolv[ycur*9+xcur] != CASE_VIDE && resolv[j*9+i] == resolv[ycur*9+xcur])
                     attron(A_BOLD);
-                mvaddch(l, c++, v2 == '.' ? v1 : v2);
+                mvaddch(l, c++, v2 == CASE_VIDE ? v1 : v2);
                 attroff(A_NORMAL);
             }
             attrset(COLOR_PAIR(NORMAL));
@@ -309,7 +313,7 @@ void affiche()
 void tstpossible(int y, int x)
 {
     int i, l, c;
-    if (resolv[y*9+x] != '.')
+    if (resolv[y*9+x] != CASE_VIDE)
         return;
     //memset(possibles[y*9+x], 1, 9);
     for (i=0; i<9; i++) possibles[y*9+x][i]=1;
@@ -335,7 +339,7 @@ void setpossibles()
     {
         for (int x=0; x<9; x++)
         {
-            if (resolv[y*9+x] != '.')
+            if (resolv[y*9+x] != CASE_VIDE)
             {
                 memset(possibles[y*9+x], 0, 9);
                 continue;
@@ -373,22 +377,6 @@ void majpossibles(int l, int c, int v)
         possibles[l*9+i][v] = 0;
         possibles[((l/3)*3+i/3)*9+(c/3)*3+i%3][v] = 0;
     }
-}
-
-/**
- * Test si deux cases ont les mêmes possibles.
- */
-int test2possibles(int l1, int c1, int l2, int c2)
-{
-    int o1 = l1*9+c1;
-    int o2 = l2*9+c2;
-
-    for (int i=0; i<9; i++)
-    {
-        if (possibles[o1][i] != possibles[o2][i])
-            return 0;
-    }
-    return 1;
 }
 
 /**
@@ -464,213 +452,56 @@ void droite(char c)
         xcur++;
 }
 
+int chercheVide(int *x, int *y)
+{
+    int r, c;
+    for (c=0; c<9; c++)
+        for (r=0; r<9; r++)
+            if (resolv[r*9+c] == '.')
+            {
+                *x=r;
+                *y=c;
+                return 1;
+            }
+    return 0;
+}
+
+int isOk(int r, int c, int val)
+{
+    int i, j;
+    for (i=0; i<9; i++)
+        if (resolv[i*9+c] == val)
+            return 0;
+    for (j=0; j<9; j++)
+        if (resolv[r*9+j] == val)
+            return 0;
+    for (i=3*(r/3); i<3*(1+r/3); i++)
+        for (j=3*(c/3); j<3*(1+c/3); j++)
+                if (resolv[i*9+j] == val)
+                    return 0;
+    return 1;
+}
+
 /**
  * Résolution de la grille courante par force brute.
- * En cas d'impossibilité, la grille finale
- * est remplie de 9... (du moins les cases
- * préalablement vide.)
  */
-int brut(int l, int c, char v)
+int brut()
 {
-    int ok = 0;
-    if (v)
-        resolv[l*9+c] = v;
-    if (verifier()) return 0;
-    for (int j=l; j<9; j++)
+    int i;
+    int r=0, c=0;
+    if (!chercheVide(&r, &c))
+        return 1;
+    for (i='1'; i<='9'; i++)
     {
-        for (int i=0; i<9; i++)
+        if (isOk(r, c, i))
         {
-            if (resolv[j*9+i] == '.')
-            {
-                for (int n='1'; n<='9'; n++)
-                    if (brut(j, i, n))
-                    {
-                        ok = 1;
-                        break;
-                    }
-                if (!ok)
-                {
-                    resolv[j*9+i] = '.';
-                    return 0;
-                }
-            }
-            if (ok) break;
-        }
-        if (ok) break;
-    }
-    return verifier() == 0;
-}
-
-/**
- * Cherche si une case est un singleton
- * et retourne sa valeur, sinon '.'.
- */
-char singleton(int l, int c)
-{
-    int nb=0;
-    char v, x;
-
-    for (int i=0; i<9; i++)
-    {
-        x = possibles[l*9+c][i];
-        nb += x;
-        v = x ? i : v;
-    }
-    return nb == 1 ? v+1 : 0;
-}
-
-/**
- * Recherche les solutions évidente sous forme
- * de singleton
- */
-int tstsingletons()
-{
-    int trouve = 1;
-    char v;
-    while (trouve)
-    {
-        trouve = 0;
-        for (int l=0; l<9; l++)
-        {
-            for (int c=0; c<9; c++)
-            {
-                if (resolv[l*9+c] != '.')
-                    continue;
-                v = singleton(l, c);
-                resolv[l*9+c] = v ? '0'+v : '.';
-                if (v)
-                    majpossibles(l, c, v);
-                trouve |= v ? 1 : 0;
-            }
-        }
-        // setpossibles();
-    }
-}
-
-/**
- * Pour chaque ligne, colonne et région, on regarde si on a deux cases
- * avec les mêmes possibles. Si c'est le cas, on supprime des autres
- * cases les chiffres correspondant.
- * Si on a trouvé des cas, on fait une passe sur les singletons et on
- * recommence.
- */
-int tstpaires()
-{
-    int trouve = 1;
-    while (trouve)
-    {
-        trouve = 0;
-        // On explore chaque ligne
-        for (int l=0; l<9; l++)
-        {
-            // Pour chaque case
-            for (int c=0; c<8; c++)
-            {
-                if (nbpossibles(l, c) == 2)
-                {
-                    // Rechercher une autre case à 2 possibles
-                    for (int i=c+1; i<9; i++)
-                    {
-                        if (nbpossibles(l, i) == 2)
-                        {
-                            if (test2possibles(l, c, l, i))
-                            {
-                                // Supprimer les valeurs sur la ligne
-                                for (int j=0; j<9; j++)
-                                {
-                                    if (j==c || j==i)
-                                        continue;
-                                    for (int v=0; v<9; v++)
-                                    {
-                                        if (possibles[l*9+c][v])
-                                        {
-                                            trouve |= possibles[l*9+j][v];
-                                            possibles[l*9+j][v] = 0;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // On explore chaque colonne
-        for (int c=0; c<9; c++)
-        {
-            // Pour chaque case
-            for (int l=0; l<8; l++)
-            {
-                if (nbpossibles(l, c) == 2)
-                {
-                    // Rechercher une autre case à 2 possibles
-                    for (int j=l+1; j<9; j++)
-                    {
-                        if (nbpossibles(j, c) == 2)
-                        {
-                            if (test2possibles(l, c, j, c))
-                            {
-                                // Supprimer les valeurs sur la ligne
-                                for (int i=0; i<9; i++)
-                                {
-                                    if (i==l || i==j)
-                                        continue;
-                                    for (int v=0; v<9; v++)
-                                    {
-                                        if (possibles[l*9+c][v])
-                                        {
-                                            trouve |= possibles[i*9+c][v];
-                                            possibles[i*9+c][v] = 0;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        // On explore chaque région
-        for (int r=0; r<9; r++)
-        {
-            // Pour chaque case de la région
-            for (int c=0; c<8; c++)
-            {
-                if (nbpossibles((r/3)*3+c/3, (r%3)*3+c%3) == 2)
-                {
-                    // Rechercher une case identique dans la région
-                    for (int i=c+1; i<9; i++)
-                    {
-                        if (nbpossibles((r/3)*3+i/3, (r%3)*3+i%3) == 2)
-                        {
-                            if (test2possibles((r/3)*3+c/3, (r%3)*3+c%3,
-                                               (r/3)*3+i/3, (r%3)*3+i%3))
-                            {
-                                // Supprimer les valeurs dans les autres cases
-                                for (int j=0; j<9; j++)
-                                {
-                                    if (j==c || j==i)
-                                        continue;
-                                    for (int v=0; v<9; v++)
-                                    {
-                                        if (possibles[((r/3)*3+c/3)*9+(r%3)*3+c%3][v])
-                                        {
-                                            trouve |= possibles[((r/3)*3+j/3)*9+(r%3)*3+j%3][v];
-                                            possibles[((r/3)*3+j/3)*9+(r%3)*3+j%3][v] = 0;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        if (trouve)
-        {
-            tstsingletons();
+            resolv[r*9+c] = i;
+            if (brut())
+                return 1;
+            resolv[r*9+c] = '.';
         }
     }
+    return 0;
 }
 
 /**
@@ -679,7 +510,7 @@ int tstpaires()
 int chiffre(int c)
 {
     // Si chiffre de base, on ne doit pas le modifier
-    if (table[ycur*9+xcur] != '.')
+    if (table[ycur*9+xcur] != CASE_VIDE)
         return c;
     // S'il s'agit bien d'un chiffre
     if (c > '0' && c <= '9')
@@ -811,10 +642,10 @@ int main(void)
                     for (;;)
                     {
                         c = getchar();
-                        if (c == '.' || c == ';' || (c >= '1' && c <= '9'))
+                        if (c == CASE_VIDE || c == ';' || (c >= '1' && c <= '9'))
                         {
-                            table[ycur*9+xcur] = c == ';' ? '.' : c;
-                            resolv[ycur*9+xcur] = c == ';' ? '.' : c;
+                            table[ycur*9+xcur] = c == ';' ? CASE_VIDE : c;
+                            resolv[ycur*9+xcur] = c == ';' ? CASE_VIDE : c;
                             break;
                         }
                         else if (c == 'q')
@@ -842,7 +673,7 @@ int main(void)
             {
                 struct timespec debut;
                 starttime(&debut);
-                brut(0, 0, 0);
+                brut();
                 mesure = elapsed(&debut);
                 break;
             }
@@ -869,24 +700,6 @@ int main(void)
         case 't':
         case 'T':
             jeutouches = (jeutouches+1)%3;
-            break;
-
-        case '$':
-            tstsingletons();
-            break;
-
-        case '%':
-            {
-                struct timespec debut;
-                starttime(&debut);
-                if (!possible)
-                {
-                    possible = 1;
-                    setpossibles();
-                }
-                tstpaires();
-                mesure = elapsed(&debut);
-            }
             break;
 
         case '+':
