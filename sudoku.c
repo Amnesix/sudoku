@@ -26,17 +26,10 @@
 
 static int couleurs[2][3] = {{NORMAL, BASE, ERREUR}, {NORMAL_, BASE_, ERREUR_}};
 
-// Quelques grilles de tests.
-#define tst1   "7186.5....3..42.....4.8.56..4729.65...........62.1784..73.5.4.....47..2....1.3975"
-#define tst2   "..7..8.3..2...974.8..2.....48......3..2...6..3......57.....7..2.618...9..9.3..5.."
-#define tst3   ".9...657171.9.5.....6.....36.41.7.......8.......5.37.41.....6.....8.1.495496...1."
-#define tst4   "4...81..2.6.........3..2.84.....3..83...7...69..6.....78.2..9.........2.6..43...7"
-#define tstE   "1.96.4.2.53.2.......8...1.5.....6.5.....4.....6.3.....2.1...7.......5.13.8.7.95.2"
-#define tstCG1 "..6....5...37.....7...35..8....7..12...942...62..8....9..12...3.....36...5....7.."
-#define tstCG2 "8..........36......7..9.2...5...7.......457.....1...3...1....68..85...1..9....4.."
-#define tstX   "....7..8......9..5.9...3....37.91...4..7...93.....5....1..6......9214.3.....37.41"
-static char *tsts[] = {tstCG1, tstCG2, tst1, tst2, tst3, tst4, tstE, tstX};
-static int tst = 1;
+// 2365 grilles réputées très difficiles.
+const char *top = "top2365";
+static char tsts[2365][82];
+static int tst = 0;
 
 static char table[81];
 static char resolv[81];
@@ -530,6 +523,13 @@ int main(void)
 {
     int err;
     int c;
+    FILE *file;
+    file = fopen(top, "rt");
+    for (int i=0; i<2365; i++) {
+        fread(tsts[i], 1, 82, file);
+        tsts[i][82] = 0;
+    }
+    fclose(file);
     for (int i=0; i<81; i++)
         table[i] = tsts[tst][i];
     memcpy(resolv, table, 81);
@@ -703,7 +703,7 @@ int main(void)
             break;
 
         case '+':
-            tst = (tst + 1) % (sizeof(tsts)/sizeof(char *));
+            tst = (tst + 1) % 2365;
             for (int i=0; i<81; i++)
                 table[i] = tsts[tst][i];
             memcpy(resolv, table, 81);
